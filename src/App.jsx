@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Home from "./Home";
+import Compare from "./Compare";
 import Alcool from "./drugs/Alcool";
 import Heroine from "./drugs/Heroine";
 import Crack from "./drugs/Crack";
@@ -29,12 +30,16 @@ const DRUGS = {
 };
 
 export default function App() {
-  const [drug, setDrug] = useState(null);
+  const [page, setPage] = useState(null);
 
-  if (drug) {
-    const DrugPage = DRUGS[drug];
-    return <DrugPage onBack={() => setDrug(null)} />;
+  if (page === "compare") {
+    return <Compare onBack={() => setPage(null)} />;
   }
 
-  return <Home onSelect={setDrug} />;
+  if (page && DRUGS[page]) {
+    const DrugPage = DRUGS[page];
+    return <DrugPage onBack={() => setPage(null)} />;
+  }
+
+  return <Home onSelect={setPage} onCompare={() => setPage("compare")} />;
 }

@@ -111,7 +111,9 @@ const SUBSTANCES = [
   },
 ];
 
-export default function Home({ onSelect }) {
+const SORTED = [...SUBSTANCES].sort((a, b) => b.score - a.score);
+
+export default function Home({ onSelect, onCompare }) {
   const w = useWidth();
   const desk = w >= 768;
 
@@ -139,9 +141,21 @@ export default function Home({ onSelect }) {
           <p style={{ fontSize: desk ? 15 : 13, color: "#64748b", margin: "0 0 8px", lineHeight: 1.7 }}>
             Les mécanismes biologiques complets de chaque substance — effets immédiats, hormones, récupération.
           </p>
-          <p style={{ fontSize: 11, color: "#475569", fontFamily: "monospace" }}>
+          <p style={{ fontSize: 11, color: "#475569", fontFamily: "monospace", marginBottom: 20 }}>
             Classement OMS dangerosité globale · David Nutt et al., The Lancet 2010
           </p>
+          <button
+            onClick={onCompare}
+            style={{
+              background: "#7c3aed22", border: "1px solid #7c3aed66", borderRadius: 10,
+              color: "#a78bfa", cursor: "pointer", padding: "10px 24px", fontSize: 13,
+              fontFamily: "monospace", letterSpacing: 1, transition: "background 0.2s",
+            }}
+            onMouseEnter={e => { e.currentTarget.style.background = "#7c3aed44"; }}
+            onMouseLeave={e => { e.currentTarget.style.background = "#7c3aed22"; }}
+          >
+            ⚖️ Comparer deux substances
+          </button>
         </div>
       </div>
 
@@ -151,7 +165,7 @@ export default function Home({ onSelect }) {
           SCORE DE DANGEROSITÉ — NUISANCE GLOBALE /100 (auto + autrui)
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 36 }}>
-          {SUBSTANCES.map((s) => (
+          {SORTED.map((s) => (
             <div key={s.id} style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer" }} onClick={() => onSelect(s.id)}>
               <div style={{ width: desk ? 130 : 90, fontSize: desk ? 13 : 11, color: "#94a3b8", textAlign: "right", flexShrink: 0 }}>
                 {s.icon} {s.name}
@@ -178,7 +192,7 @@ export default function Home({ onSelect }) {
           CHOISISSEZ UNE SUBSTANCE — GUIDE COMPLET
         </div>
         <div style={{ display: "grid", gridTemplateColumns: desk ? "1fr 1fr 1fr 1fr" : "1fr 1fr", gap: 14 }}>
-          {SUBSTANCES.map((s) => (
+          {SORTED.map((s) => (
             <button
               key={s.id}
               onClick={() => onSelect(s.id)}
