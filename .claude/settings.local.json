@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Path \"d:\\\\Code\\\\Logiciel\\\\laragon\\\\www\\\\Alcool\" -Recurse -Force)",
+      "Bash(Select-Object -Property FullName, PSIsContainer)",
+      "Bash(Sort-Object FullName)",
+      "Bash(ConvertTo-Csv -NoTypeInformation)",
+      "Bash(Out-String)",
+      "Bash(mkdir -p \"d:\\\\Code\\\\Logiciel\\\\laragon\\\\www\\\\Alcool\\\\src\\\\drugs\")",
+      "Bash(npm run *)"
+    ],
+    "additionalDirectories": [
+      "d:\\Code\\Logiciel\\laragon\\www\\Alcool\\src"
+    ]
+  }
+}
