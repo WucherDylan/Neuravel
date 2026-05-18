@@ -6,7 +6,8 @@ import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, ReferenceLine,
 } from "recharts";
 
-// Données comparatives normalisées pour les 12 substances
+// Données comparatives — scénario : usage régulier / dépendance installée (6–12 mois d'usage)
+// Récupération = retour à la baseline du système dopaminergique après arrêt complet
 const DRUG_DATA = {
   alcool: {
     name: "Alcool", icon: "🍷", color: "#ef4444", score: 72,
@@ -14,13 +15,14 @@ const DRUG_DATA = {
     dopaminePeak: "+40–80%",
     dependancePhysique: "Élevée",
     sevrageMortel: true,
-    recuperationDopamine: "2 semaines",
+    // GABA-A et D2 se normalisent en 3-12 mois selon la sévérité (pas 2 semaines = gueule de bois)
+    recuperationDopamine: "3–12 mois",
     risqueOD: "Élevé (dépression SNC)",
     mecanisme: "GABA, NMDA, dopamine",
     radar: { danger: 72, addiction: 75, euphorie: 55, neurotox: 65, sevrage: 90, duree: 25 },
     recovery: [
-      { t: "J1", v: 30 }, { t: "J3", v: 45 }, { t: "J7", v: 60 },
-      { t: "M1", v: 75 }, { t: "M3", v: 85 }, { t: "M6", v: 92 }, { t: "An1", v: 100 },
+      { t: "J1", v: 28 }, { t: "J3", v: 40 }, { t: "J7", v: 53 },
+      { t: "M1", v: 67 }, { t: "M3", v: 80 }, { t: "M6", v: 91 }, { t: "An1", v: 98 },
     ],
   },
   heroine: {
@@ -29,13 +31,14 @@ const DRUG_DATA = {
     dopaminePeak: "+200%",
     dependancePhysique: "Extrême",
     sevrageMortel: false,
+    // MOR downrégulation + D2 indirect : 12-24 mois pour usage lourd
     recuperationDopamine: "12–24 mois",
     risqueOD: "Très élevé (dépression respi.)",
     mecanisme: "µ-opioïde (MOR)",
     radar: { danger: 70, addiction: 92, euphorie: 90, neurotox: 40, sevrage: 80, duree: 25 },
     recovery: [
-      { t: "J1", v: 20 }, { t: "J3", v: 30 }, { t: "J7", v: 45 },
-      { t: "M1", v: 58 }, { t: "M3", v: 70 }, { t: "M6", v: 82 }, { t: "An1", v: 90 },
+      { t: "J1", v: 18 }, { t: "J3", v: 27 }, { t: "J7", v: 38 },
+      { t: "M1", v: 50 }, { t: "M3", v: 63 }, { t: "M6", v: 75 }, { t: "An1", v: 87 },
     ],
   },
   crack: {
@@ -44,12 +47,13 @@ const DRUG_DATA = {
     dopaminePeak: "+400–500%",
     dependancePhysique: "Modérée",
     sevrageMortel: false,
+    // Binge compulsif → DAT downrégulé comme cocaïne mais plus sévère : 12-18 mois
     recuperationDopamine: "12–18 mois",
     risqueOD: "Élevé (arythmie, AVC)",
     mecanisme: "DAT blockade, noradrénaline",
     radar: { danger: 65, addiction: 95, euphorie: 95, neurotox: 50, sevrage: 55, duree: 5 },
     recovery: [
-      { t: "J1", v: 35 }, { t: "J3", v: 42 }, { t: "J7", v: 52 },
+      { t: "J1", v: 32 }, { t: "J3", v: 42 }, { t: "J7", v: 52 },
       { t: "M1", v: 63 }, { t: "M3", v: 74 }, { t: "M6", v: 85 }, { t: "An1", v: 94 },
     ],
   },
@@ -59,13 +63,14 @@ const DRUG_DATA = {
     dopaminePeak: "+700–900%",
     dependancePhysique: "Élevée",
     sevrageMortel: false,
-    recuperationDopamine: "18–24 mois",
+    // Neurotoxicité DAT/SERT réelle → 18-24 mois, parfois séquelles permanentes
+    recuperationDopamine: "18–24 mois (partiel)",
     risqueOD: "Modéré (hyperthermie, AVC)",
     mecanisme: "DAT/NET/SERT reversal massif",
     radar: { danger: 55, addiction: 85, euphorie: 85, neurotox: 90, sevrage: 65, duree: 80 },
     recovery: [
-      { t: "J1", v: 25 }, { t: "J3", v: 35 }, { t: "J7", v: 45 },
-      { t: "M1", v: 55 }, { t: "M3", v: 68 }, { t: "M6", v: 80 }, { t: "An1", v: 90 },
+      { t: "J1", v: 22 }, { t: "J3", v: 31 }, { t: "J7", v: 41 },
+      { t: "M1", v: 52 }, { t: "M3", v: 63 }, { t: "M6", v: 74 }, { t: "An1", v: 83 },
     ],
   },
   cocaine: {
@@ -74,13 +79,14 @@ const DRUG_DATA = {
     dopaminePeak: "+250–300%",
     dependancePhysique: "Modérée",
     sevrageMortel: false,
-    recuperationDopamine: "12 mois",
+    // Bloqueur pur (pas de reversal), pas de neurotoxicité directe → récupération 6-12 mois
+    recuperationDopamine: "6–12 mois",
     risqueOD: "Modéré (infarctus coronarien)",
     mecanisme: "DAT + NET + SERT blockade",
     radar: { danger: 45, addiction: 70, euphorie: 80, neurotox: 45, sevrage: 50, duree: 18 },
     recovery: [
-      { t: "J1", v: 40 }, { t: "J3", v: 50 }, { t: "J7", v: 60 },
-      { t: "M1", v: 72 }, { t: "M3", v: 82 }, { t: "M6", v: 92 }, { t: "An1", v: 100 },
+      { t: "J1", v: 48 }, { t: "J3", v: 58 }, { t: "J7", v: 68 },
+      { t: "M1", v: 79 }, { t: "M3", v: 89 }, { t: "M6", v: 97 }, { t: "An1", v: 100 },
     ],
   },
   tabac: {
@@ -89,13 +95,14 @@ const DRUG_DATA = {
     dopaminePeak: "+25–40%",
     dependancePhysique: "Élevée",
     sevrageMortel: false,
+    // nAChR se normalisent en 4-8 semaines après arrêt tabac
     recuperationDopamine: "4–8 semaines",
     risqueOD: "Faible aigu (haute dose chronique)",
     mecanisme: "Récepteurs nicotiniques nAChR",
     radar: { danger: 40, addiction: 80, euphorie: 18, neurotox: 50, sevrage: 55, duree: 10 },
     recovery: [
-      { t: "J1", v: 50 }, { t: "J3", v: 58 }, { t: "J7", v: 68 },
-      { t: "M1", v: 80 }, { t: "M3", v: 90 }, { t: "M6", v: 96 }, { t: "An1", v: 100 },
+      { t: "J1", v: 55 }, { t: "J3", v: 65 }, { t: "J7", v: 76 },
+      { t: "M1", v: 89 }, { t: "M3", v: 96 }, { t: "M6", v: 99 }, { t: "An1", v: 100 },
     ],
   },
   cannabis: {
@@ -104,13 +111,14 @@ const DRUG_DATA = {
     dopaminePeak: "+20–40%",
     dependancePhysique: "Faible",
     sevrageMortel: false,
+    // CB1 recovery + D2 baseline : 4-8 semaines pour usage quotidien
     recuperationDopamine: "4–8 semaines",
     risqueOD: "Quasi-nul",
     mecanisme: "CB1 / CB2 agoniste",
     radar: { danger: 28, addiction: 32, euphorie: 45, neurotox: 28, sevrage: 20, duree: 28 },
     recovery: [
-      { t: "J1", v: 60 }, { t: "J3", v: 68 }, { t: "J7", v: 76 },
-      { t: "M1", v: 85 }, { t: "M3", v: 92 }, { t: "M6", v: 97 }, { t: "An1", v: 100 },
+      { t: "J1", v: 63 }, { t: "J3", v: 72 }, { t: "J7", v: 81 },
+      { t: "M1", v: 91 }, { t: "M3", v: 97 }, { t: "M6", v: 100 }, { t: "An1", v: 100 },
     ],
   },
   benzos: {
@@ -119,13 +127,14 @@ const DRUG_DATA = {
     dopaminePeak: "+15–30% (indirect)",
     dependancePhysique: "Élevée",
     sevrageMortel: true,
-    recuperationDopamine: "4–12 semaines",
+    // GABA-A sensitisation avec sevrage progressif (Ashton) : 4-12 semaines
+    recuperationDopamine: "4–12 semaines (avec sevrage progressif)",
     risqueOD: "Élevé si combiné (alcool++)",
     mecanisme: "GABA-A modulateur allostérique",
     radar: { danger: 35, addiction: 68, euphorie: 28, neurotox: 22, sevrage: 88, duree: 38 },
     recovery: [
-      { t: "J1", v: 45 }, { t: "J3", v: 50 }, { t: "J7", v: 58 },
-      { t: "M1", v: 70 }, { t: "M3", v: 82 }, { t: "M6", v: 92 }, { t: "An1", v: 100 },
+      { t: "J1", v: 48 }, { t: "J3", v: 55 }, { t: "J7", v: 65 },
+      { t: "M1", v: 80 }, { t: "M3", v: 91 }, { t: "M6", v: 97 }, { t: "An1", v: 100 },
     ],
   },
   cathinones: {
@@ -134,13 +143,14 @@ const DRUG_DATA = {
     dopaminePeak: "+380%",
     dependancePhysique: "Modérée",
     sevrageMortel: false,
-    recuperationDopamine: "8–14 mois",
+    // Triple mécanisme mais moins neurotoxique que meth ; comparable à MDMA : 3-6 mois
+    recuperationDopamine: "3–6 mois",
     risqueOD: "Modéré (hyperthermie, card.)",
     mecanisme: "DAT/NET/SERT inhibiteur + libérateur",
-    radar: { danger: 40, addiction: 65, euphorie: 80, neurotox: 58, sevrage: 42, duree: 15 },
+    radar: { danger: 40, addiction: 65, euphorie: 80, neurotox: 55, sevrage: 42, duree: 15 },
     recovery: [
-      { t: "J1", v: 40 }, { t: "J3", v: 50 }, { t: "J7", v: 60 },
-      { t: "M1", v: 70 }, { t: "M3", v: 80 }, { t: "M6", v: 90 }, { t: "An1", v: 98 },
+      { t: "J1", v: 55 }, { t: "J3", v: 64 }, { t: "J7", v: 73 },
+      { t: "M1", v: 83 }, { t: "M3", v: 93 }, { t: "M6", v: 99 }, { t: "An1", v: 100 },
     ],
   },
   amphetamines: {
@@ -149,13 +159,14 @@ const DRUG_DATA = {
     dopaminePeak: "+300–420%",
     dependancePhysique: "Modérée",
     sevrageMortel: false,
-    recuperationDopamine: "12–24 mois",
+    // Reversal DAT/NET mais moins neurotoxique que meth → 6-12 mois (pas 12-24)
+    recuperationDopamine: "6–12 mois",
     risqueOD: "Modéré (AVC hypertensif)",
     mecanisme: "DAT/NET/SERT reversal",
     radar: { danger: 35, addiction: 60, euphorie: 72, neurotox: 42, sevrage: 45, duree: 42 },
     recovery: [
-      { t: "J1", v: 40 }, { t: "J3", v: 50 }, { t: "J7", v: 60 },
-      { t: "M1", v: 72 }, { t: "M3", v: 83 }, { t: "M6", v: 92 }, { t: "An1", v: 100 },
+      { t: "J1", v: 45 }, { t: "J3", v: 55 }, { t: "J7", v: 65 },
+      { t: "M1", v: 76 }, { t: "M3", v: 87 }, { t: "M6", v: 96 }, { t: "An1", v: 100 },
     ],
   },
   champignons: {
@@ -164,12 +175,13 @@ const DRUG_DATA = {
     dopaminePeak: "+15–30% (indirect)",
     dependancePhysique: "Nulle",
     sevrageMortel: false,
-    recuperationDopamine: "Aucune altération",
+    // Agonisme direct 5-HT2A, pas de neurotoxicité dopaminergique
+    recuperationDopamine: "Aucune altération dopaminergique",
     risqueOD: "Quasi-nul (aucun documenté)",
     mecanisme: "5-HT2A agoniste partial",
     radar: { danger: 10, addiction: 5, euphorie: 62, neurotox: 5, sevrage: 0, duree: 32 },
     recovery: [
-      { t: "J1", v: 90 }, { t: "J3", v: 95 }, { t: "J7", v: 98 },
+      { t: "J1", v: 97 }, { t: "J3", v: 99 }, { t: "J7", v: 100 },
       { t: "M1", v: 100 }, { t: "M3", v: 100 }, { t: "M6", v: 100 }, { t: "An1", v: 100 },
     ],
   },
@@ -179,12 +191,13 @@ const DRUG_DATA = {
     dopaminePeak: "+20–40% (indirect)",
     dependancePhysique: "Nulle",
     sevrageMortel: false,
-    recuperationDopamine: "Aucune altération",
+    // Agonisme direct 5-HT2A, tolérance croisée rapide mais pas de toxicité dopaminergique
+    recuperationDopamine: "Aucune altération dopaminergique",
     risqueOD: "Quasi-nul (aucun direct)",
     mecanisme: "5-HT2A + D1/D2 + α1 agoniste",
     radar: { danger: 12, addiction: 8, euphorie: 70, neurotox: 8, sevrage: 0, duree: 78 },
     recovery: [
-      { t: "J1", v: 88 }, { t: "J3", v: 93 }, { t: "J7", v: 97 },
+      { t: "J1", v: 95 }, { t: "J3", v: 98 }, { t: "J7", v: 100 },
       { t: "M1", v: 100 }, { t: "M3", v: 100 }, { t: "M6", v: 100 }, { t: "An1", v: 100 },
     ],
   },
@@ -419,8 +432,11 @@ export default function Compare({ onBack }) {
 
             {/* Recovery timeline */}
             <div style={{ background: "#0d0d1a", border: "1px solid #1e1e3a", borderRadius: 14, padding: 20 }}>
-              <div style={{ fontSize: 12, color: "#475569", letterSpacing: 3, fontFamily: "monospace", marginBottom: 16 }}>
+              <div style={{ fontSize: 12, color: "#475569", letterSpacing: 3, fontFamily: "monospace", marginBottom: 6 }}>
                 COURBE DE RÉCUPÉRATION COMPARÉE (% système dopaminergique normalisé)
+              </div>
+              <div style={{ fontSize: 11, color: "#334155", fontFamily: "monospace", marginBottom: 16 }}>
+                Scénario : usage régulier / dépendance installée (6–12 mois d'usage) · arrêt complet
               </div>
               <ResponsiveContainer width="100%" height={240}>
                 <AreaChart data={recoveryData}>
