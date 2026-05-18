@@ -134,7 +134,7 @@ export default function Home({ onSelect }) {
             background: "linear-gradient(135deg, #fff 40%, #7c3aed)",
             WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
           }}>
-            Drogues & Cerveau
+            Neuravel
           </h1>
           <p style={{ fontSize: desk ? 15 : 13, color: "#64748b", margin: "0 0 8px", lineHeight: 1.7 }}>
             Les mécanismes biologiques complets de chaque substance — effets immédiats, hormones, récupération.
