@@ -22,6 +22,16 @@ const serotoninData = [
   { time: "12h", serotonin: 100, perception: 100 },
 ];
 
+const recoveryData = [
+  { time: "Fin trip", bdnf: 150, humeur: 118, energie: 85 },
+  { time: "J+1", bdnf: 168, humeur: 128, energie: 95 },
+  { time: "J+3", bdnf: 155, humeur: 120, energie: 100 },
+  { time: "J+7", bdnf: 138, humeur: 112, energie: 100 },
+  { time: "J+14", bdnf: 118, humeur: 107, energie: 100 },
+  { time: "J+21", bdnf: 108, humeur: 103, energie: 100 },
+  { time: "J+30", bdnf: 100, humeur: 100, energie: 100 },
+];
+
 // Default Mode Network suppression
 const dmnData = [
   { phase: "Repos", dmn: 100, connectivity: 100 },
@@ -50,9 +60,22 @@ const NAV = [
   { id: "hormones", label: "Neurochimie" },
   { id: "therapy", label: "Thérapie" },
   { id: "stop", label: "Sécurité" },
+  { id: "sources", label: "Sources" },
 ];
 
 function SeroTooltip({ active, payload, label }) {
+  if (!active || !payload?.length) return null;
+  return (
+    <div style={{ background: "#0d0d1a", border: `1px solid ${COLOR}33`, borderRadius: 8, padding: "10px 14px", fontSize: 12 }}>
+      <div style={{ color: "#94a3b8", marginBottom: 6 }}>{label}</div>
+      {payload.map((p) => (
+        <div key={p.name} style={{ color: p.color }}>{p.name}: {p.value}%</div>
+      ))}
+    </div>
+  );
+}
+
+function RecTooltip({ active, payload, label }) {
   if (!active || !payload?.length) return null;
   return (
     <div style={{ background: "#0d0d1a", border: `1px solid ${COLOR}33`, borderRadius: 8, padding: "10px 14px", fontSize: 12 }}>
@@ -88,6 +111,45 @@ function TherapyTooltip({ active, payload, label }) {
   );
 }
 
+function Sources({ desk }) {
+  const refs = [
+    { authors: "Nutt DJ et al.", title: "Drug harms in the UK: a multicriteria decision analysis", journal: "The Lancet", year: "2010", url: "https://www.thelancet.com/journals/lancet/article/PIIS0140-6736(10)61462-6/fulltext" },
+    { authors: "COMPASS Pathways", title: "Phase 3 Trial of COMP360 for Treatment-Resistant Depression — Primary Endpoint Achieved", journal: "COMPASS Pathways Clinical Trial", year: "2025", url: "https://compasspathways.com/compass-pathways-announces-positive-results-from-phase-3-trial/" },
+    { authors: "Carhart-Harris R et al.", title: "Trial of Psilocybin versus Escitalopram for Depression", journal: "New England Journal of Medicine", year: "2021", url: "https://www.nejm.org/doi/full/10.1056/nejmoa2032994" },
+    { authors: "Ly C et al.", title: "Psychedelics Promote Structural and Functional Neural Plasticity", journal: "Cell Reports", year: "2018", url: "https://pubmed.ncbi.nlm.nih.gov/29898390/" },
+    { authors: "Daws RE et al.", title: "Increased global integration in the brain after psilocybin therapy for depression", journal: "Nature Medicine", year: "2022", url: "https://www.nature.com/articles/s41591-022-01744-z" },
+    { authors: "FDA", title: "Breakthrough Therapy Designation — Psilocybin for treatment-resistant depression", journal: "U.S. Food and Drug Administration", year: "2018", url: "https://www.fda.gov/patients/fast-track-breakthrough-therapy-accelerated-approval-priority-review/breakthrough-therapy" },
+  ];
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+      <SectionTitle color={COLOR}>Sources & Références scientifiques</SectionTitle>
+      <div style={{ background: `${COLOR}10`, border: `1px solid ${COLOR}33`, borderRadius: 12, padding: 20 }}>
+        <div style={{ fontSize: 12, color: COLOR, fontFamily: "monospace", marginBottom: 8 }}>PEER-REVIEWED · COMPASS · NEJM · NATURE</div>
+        <p style={{ color: "#94a3b8", fontSize: 13, lineHeight: 1.7, margin: 0 }}>
+          La psilocybine est l'une des substances les plus activement étudiées en psychiatrie aujourd'hui.
+          En juin 2025, COMPASS Pathways a annoncé des résultats positifs de Phase 3 pour la dépression résistante.
+        </p>
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        {refs.map((r, i) => (
+          <a key={i} href={r.url} target="_blank" rel="noopener noreferrer" style={{
+            display: "block", background: "#0d0d1a", border: `1px solid ${COLOR}22`,
+            borderRadius: 10, padding: "14px 18px", textDecoration: "none", transition: "border-color 0.2s",
+          }}
+          onMouseEnter={e => e.currentTarget.style.borderColor = COLOR + "55"}
+          onMouseLeave={e => e.currentTarget.style.borderColor = COLOR + "22"}
+          >
+            <div style={{ fontSize: 12, color: "#e2e8f0", marginBottom: 4 }}>
+              {r.authors} · <span style={{ color: COLOR }}>{r.journal}</span> · {r.year}
+            </div>
+            <div style={{ fontSize: 11, color: "#64748b", lineHeight: 1.5, fontStyle: "italic" }}>{r.title}</div>
+          </a>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function Champignons({ onBack }) {
   const [section, setSection] = useState("overview");
   const w = useWidth();
@@ -102,6 +164,7 @@ export default function Champignons({ onBack }) {
       case "hormones": return <Neurochimie desk={desk} />;
       case "therapy": return <Therapy desk={desk} />;
       case "stop": return <Safety desk={desk} />;
+      case "sources": return <Sources desk={desk} />;
       default: return null;
     }
   };
@@ -367,7 +430,10 @@ function Systems({ desk }) {
 function Timeline({ desk }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
-      <SectionTitle color={COLOR}>Timeline & Durée d'action</SectionTitle>
+      <SectionTitle color={COLOR}>Timeline</SectionTitle>
+
+      <div style={{ fontSize: 11, color: COLOR, letterSpacing: 3, fontFamily: "monospace", marginBottom: 16, paddingBottom: 8, borderBottom: `1px solid ${COLOR}22` }}>PARTIE 1 — EFFETS ACTIFS (4–6h)</div>
+
       <Card color={COLOR}>
         <div style={{ fontSize: 12, color: COLOR, fontFamily: "monospace", marginBottom: 12 }}>ACTIVATION 5-HT2A & PERCEPTION (% baseline)</div>
         <ResponsiveContainer width="100%" height={260}>
@@ -422,6 +488,36 @@ function Timeline({ desk }) {
         </ResponsiveContainer>
         <div style={{ fontSize: 11, color: "#475569", textAlign: "center", marginTop: 8, fontFamily: "monospace" }}>
           Dissolution de l'ego = DMN supprimé + connectivité maximale
+        </div>
+      </Card>
+      <div style={{ fontSize: 11, color: "#22c55e", letterSpacing: 3, fontFamily: "monospace", marginBottom: 16, marginTop: 8, paddingBottom: 8, borderBottom: "1px solid #22c55e22" }}>PARTIE 2 — ARRÊT & RÉCUPÉRATION (J+1 → J+30)</div>
+
+      <Card color={COLOR}>
+        <div style={{ fontSize: 12, color: COLOR, fontFamily: "monospace", marginBottom: 12 }}>RÉCUPÉRATION — BDNF, HUMEUR & ÉNERGIE (% baseline)</div>
+        <ResponsiveContainer width="100%" height={220}>
+          <AreaChart data={recoveryData}>
+            <defs>
+              <linearGradient id="cham-bdnfGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor={COLOR} stopOpacity={0.4} />
+                <stop offset="95%" stopColor={COLOR} stopOpacity={0} />
+              </linearGradient>
+              <linearGradient id="cham-humGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#22c55e" stopOpacity={0.3} />
+                <stop offset="95%" stopColor="#22c55e" stopOpacity={0} />
+              </linearGradient>
+            </defs>
+            <CartesianGrid strokeDasharray="3 3" stroke="#1e1e3a" />
+            <XAxis dataKey="time" tick={{ fill: "#64748b", fontSize: 11 }} />
+            <YAxis tick={{ fill: "#64748b", fontSize: 11 }} unit="%" domain={[80, 180]} />
+            <Tooltip content={<RecTooltip />} />
+            <ReferenceLine y={100} stroke="#334155" strokeDasharray="4 4" />
+            <Legend wrapperStyle={{ fontSize: 11, color: "#64748b" }} />
+            <Area type="monotone" dataKey="bdnf" name="BDNF (neuroplasticité)" stroke={COLOR} fill="url(#cham-bdnfGrad)" strokeWidth={2} dot={false} />
+            <Area type="monotone" dataKey="humeur" name="Humeur / afterglow" stroke="#22c55e" fill="url(#cham-humGrad)" strokeWidth={2} dot={false} />
+          </AreaChart>
+        </ResponsiveContainer>
+        <div style={{ fontSize: 11, color: "#475569", textAlign: "center", marginTop: 8, fontFamily: "monospace" }}>
+          Fenêtre de neuroplasticité maximale J+1 à J+7 — retour baseline en ≈ 30 jours
         </div>
       </Card>
     </div>

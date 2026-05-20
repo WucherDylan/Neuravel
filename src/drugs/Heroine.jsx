@@ -1,18 +1,11 @@
 import { useState } from "react";
-import { XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine, Area, AreaChart } from "recharts";
 import { useWidth, SectionTitle, Card } from "../shared";
+import {
+  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
+  ResponsiveContainer, ReferenceLine, Legend,
+} from "recharts";
 
 const COLOR = "#a855f7";
-
-const NAV = [
-  { id: "overview", label: "Vue d'ensemble", icon: "⚡" },
-  { id: "immediate", label: "Effets immédiats", icon: "💉" },
-  { id: "systems", label: "Systèmes affectés", icon: "🧬" },
-  { id: "timeline", label: "Timeline sevrage", icon: "📅" },
-  { id: "hormones", label: "Dopamine & Hormones", icon: "📈" },
-  { id: "overdose", label: "Overdose & Sevrage", icon: "⚠️" },
-  { id: "stop", label: "Récupération", icon: "🌱" },
-];
 
 const dopamineData = [
   { time: "Baseline", normal: 100, drug: 100 },
@@ -100,6 +93,17 @@ const stopBenefits = [
   { period: "1-2 ans", color: "#22c55e", benefits: ["Récupération neurologique substantielle", "Relations et vie sociale reconstituées", "Risque de rechute qui décline"] },
 ];
 
+const NAV = [
+  { id: "overview", label: "Présentation" },
+  { id: "immediate", label: "Effets immédiats" },
+  { id: "systems", label: "Systèmes affectés" },
+  { id: "timeline", label: "Timeline" },
+  { id: "hormones", label: "Neurochimie" },
+  { id: "risks", label: "Overdose & Sevrage" },
+  { id: "stop", label: "Sécurité" },
+  { id: "sources", label: "Sources" },
+];
+
 const DopaTip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
   return (
@@ -107,7 +111,7 @@ const DopaTip = ({ active, payload, label }) => {
       <div style={{ color: "#94a3b8", fontSize: 11, marginBottom: 6 }}>{label}</div>
       {payload.map((p, i) => (
         <div key={i} style={{ color: p.color, fontSize: 12, marginBottom: 2 }}>
-          {p.name === "normal" ? "🟢 Dopamine saine" : "🔴 Héroïne"}: <strong>{p.value}%</strong>
+          {p.name === "normal" ? "Baseline saine" : "Post-héroïne"}: <strong>{p.value}%</strong>
         </div>
       ))}
     </div>
@@ -121,19 +125,447 @@ const EndoTip = ({ active, payload, label }) => {
       <div style={{ color: "#94a3b8", fontSize: 11, marginBottom: 6 }}>{label}</div>
       {payload.map((p, i) => (
         <div key={i} style={{ color: p.color, fontSize: 12, marginBottom: 2 }}>
-          {p.name === "endogenes" ? "🟢 Endorphines naturelles" : "🔴 Opioïdes exogènes"}: <strong>{p.value}%</strong>
+          {p.name === "endogenes" ? "Endorphines naturelles" : "Opioïdes exogènes"}: <strong>{p.value}%</strong>
         </div>
       ))}
     </div>
   );
 };
 
-export default function Heroine({ onBack }) {
-  const [activeNav, setActiveNav] = useState("overview");
+function Overview({ desk }) {
+  return (
+    <div>
+      <SectionTitle color={COLOR}>Présentation</SectionTitle>
+      <div style={{ display: "grid", gridTemplateColumns: desk ? "1fr 1fr" : "1fr", gap: 24, marginBottom: 24 }}>
+        <div style={{ background: "#1a0530", border: `1px solid ${COLOR}33`, borderRadius: 14, padding: 20 }}>
+          <div style={{ fontSize: 11, color: COLOR, letterSpacing: 2, fontFamily: "monospace", marginBottom: 16 }}>PROFIL PHARMACOLOGIQUE</div>
+          {[
+            { label: "Classe", value: "Opioïde semi-synthétique (diacétylmorphine)" },
+            { label: "Mécanisme", value: "Agoniste µ-opioïde (MOR) — récepteurs endorphines" },
+            { label: "Onset (IV)", value: "8-30 secondes — flash immédiat" },
+            { label: "Durée du high", value: "4-6 heures" },
+            { label: "Dépendance physique", value: "Après 2-3 semaines d'usage régulier" },
+            { label: "Potentiel addictif", value: "#2 mondial (OMS)" },
+          ].map((item, i) => (
+            <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 10, paddingBottom: 10, borderBottom: i < 5 ? "1px solid #2d1b4e" : "none" }}>
+              <span style={{ fontSize: 12, color: "#64748b", flexShrink: 0, width: "40%" }}>{item.label}</span>
+              <span style={{ fontSize: 12, color: "#e2e8f0", textAlign: "right" }}>{item.value}</span>
+            </div>
+          ))}
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+          {[
+            { val: "+200%", label: "Dopamine nucleus accumbens", sub: "vs toute expérience naturelle", color: COLOR },
+            { val: "2-3 sem", label: "Dépendance physique", sub: "avec usage régulier", color: "#f97316" },
+            { val: "−70%", label: "Testostérone", sub: "hypogonadisme opioïde", color: "#f87171" },
+            { val: "1/3", label: "Risque dépendance vie", sub: "si usage régulier amorcé", color: "#fb923c" },
+            { val: "72h", label: "Pic sevrage", sub: "syndrome cold turkey", color: "#a855f7" },
+            { val: "12-24m", label: "Récupération complète", sub: "circuits dopamine", color: "#22c55e" },
+          ].map((s, i) => (
+            <div key={i} style={{ background: "#0d0d1a", border: "1px solid #1e1e3a", borderRadius: 12, padding: 14, textAlign: "center" }}>
+              <div style={{ fontSize: desk ? 20 : 16, fontWeight: "bold", color: s.color, marginBottom: 4, fontFamily: "monospace" }}>{s.val}</div>
+              <div style={{ fontSize: 11, color: "#e2e8f0", marginBottom: 3 }}>{s.label}</div>
+              <div style={{ fontSize: 10, color: "#475569" }}>{s.sub}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+      <Card color={COLOR}>
+        <div style={{ fontSize: 11, color: COLOR, letterSpacing: 2, fontFamily: "monospace", marginBottom: 14 }}>MÉCANISME CENTRAL — POURQUOI C'EST SI ADDICTIF</div>
+        <div style={{ display: "grid", gridTemplateColumns: desk ? "1fr 1fr 1fr" : "1fr", gap: 14 }}>
+          {[
+            { title: "Le système opioïde endogène", desc: "Ton cerveau produit naturellement des endorphines qui se fixent aux récepteurs opioïdes — pour gérer la douleur, l'effort, le plaisir social. L'héroïne simule ce système avec une intensité 10-100× supérieure." },
+            { title: "L'effondrement endogène", desc: "Avec l'usage régulier, le cerveau réduit sa production d'endorphines (régulation négative). Tu deviens dépendant de l'apport externe juste pour te sentir normal — pas pour te sentir bien." },
+            { title: "Le sevrage comme anti-plaisir", desc: "Le sevrage n'est pas l'absence de plaisir, c'est l'activation active du système douleur/stress. Douleurs osseuses, nausées, anxiété extrême — le cerveau purifie sa chimie en sens inverse." },
+          ].map((m, i) => (
+            <div key={i} style={{ background: "#060610", borderRadius: 10, padding: 14 }}>
+              <div style={{ fontSize: 12, color: COLOR, marginBottom: 6, fontWeight: "bold" }}>{m.title}</div>
+              <div style={{ fontSize: 12, color: "#94a3b8", lineHeight: 1.5 }}>{m.desc}</div>
+            </div>
+          ))}
+        </div>
+      </Card>
+    </div>
+  );
+}
+
+function Immediate({ desk }) {
+  return (
+    <div>
+      <SectionTitle color={COLOR}>Effets immédiats — de l'injection au manque</SectionTitle>
+      <div style={{ display: "grid", gridTemplateColumns: desk ? "1fr 1fr" : "1fr", gap: 14 }}>
+        {[
+          { time: "0–30 sec (IV)", color: "#a855f7", icon: "⚡", title: "Le Flash", events: ["Chaleur intense qui monte de l'abdomen au crâne", "Euphorie absolue — toute douleur physique et psychologique disparaît", "Sensation de bien-être total, plénitude", "Récepteurs µ-opioïdes saturés en secondes", "Dopamine +200% dans le nucleus accumbens"] },
+          { time: "5–30 min", color: "#8b5cf6", icon: "🌊", title: "L'Euphorie", events: ["Sensation de paix profonde, chaleur corporelle", "Détachement du monde extérieur", "Analgésie totale — plus aucune douleur", "Nausées possibles (activation trigone area)", "Conscience intacte mais altérée"] },
+          { time: "1–4h", color: "#6366f1", icon: "😴", title: "Le 'Nod'", events: ["Semi-conscience — oscillation entre éveil et somnolence", "Euphorie qui décline progressivement", "Corps lourd, muscles relâchés", "Respiration ralentie — risque si forte dose", "Pupilles en points (myosis)"] },
+          { time: "4–8h", color: "#f97316", icon: "⬇️", title: "La Descente", events: ["Disparition progressive de l'euphorie", "Retour de la conscience normale", "Premiers signaux de manque si dépendant", "Anxiété légère, inconfort croissant", "Besoin psychologique de redoser"] },
+          { time: "8–24h (sevrage)", color: "#ef4444", icon: "🆘", title: "Syndrome de sevrage", events: ["Larmoiements, éternuements, sueurs froides", "Douleurs musculaires et osseuses", "Diarrhée, nausées, vomissements", "Anxiété intense, insomnie, agitation", "Craving écrasant — tout le corps réclame"] },
+        ].map((phase, i) => (
+          <div key={i} style={{ background: "#0d0d1a", border: `1px solid ${phase.color}22`, borderRadius: 12, padding: 16 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+              <span style={{ fontSize: 20 }}>{phase.icon}</span>
+              <div style={{ textAlign: "right" }}>
+                <div style={{ fontSize: 14, fontWeight: "bold", color: "#e2e8f0" }}>{phase.title}</div>
+                <div style={{ fontSize: 10, color: phase.color, fontFamily: "monospace" }}>{phase.time}</div>
+              </div>
+            </div>
+            {phase.events.map((e, j) => (
+              <div key={j} style={{ fontSize: 12, color: "#94a3b8", marginBottom: 5, paddingLeft: 10, borderLeft: `2px solid ${phase.color}44`, lineHeight: 1.5 }}>{e}</div>
+            ))}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function Systems({ desk }) {
   const [activeSystem, setActiveSystem] = useState(0);
-  const [activeDay, setActiveDay] = useState(0);
+  return (
+    <div>
+      <SectionTitle color={COLOR}>Systèmes biologiques affectés</SectionTitle>
+      <div style={{ display: "flex", gap: 10, marginBottom: 20, flexWrap: "wrap" }}>
+        {systems.map((s, i) => (
+          <button key={i} onClick={() => setActiveSystem(i)} style={{
+            padding: "8px 18px", borderRadius: 20,
+            border: `1.5px solid ${activeSystem === i ? s.color : "#1e1e3a"}`,
+            background: activeSystem === i ? s.color + "22" : "transparent",
+            color: activeSystem === i ? s.color : "#64748b",
+            fontSize: 13, cursor: "pointer", whiteSpace: "nowrap",
+          }}>
+            {s.icon} {s.title}
+          </button>
+        ))}
+      </div>
+      <div style={{ background: "#0d0d1a", border: `1px solid ${systems[activeSystem].color}33`, borderRadius: 14, padding: 24 }}>
+        <div style={{ fontSize: 18, fontWeight: "bold", color: systems[activeSystem].color, marginBottom: 20 }}>
+          {systems[activeSystem].icon} {systems[activeSystem].title}
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: desk ? "1fr 1fr" : "1fr", gap: 12 }}>
+          {systems[activeSystem].impacts.map((imp, i) => (
+            <div key={i} style={{ padding: 14, background: "#060610", borderRadius: 10, borderLeft: `3px solid ${systems[activeSystem].color}66` }}>
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
+                <span style={{ fontSize: 13, fontWeight: "bold", color: "#e2e8f0" }}>{imp.label}</span>
+                <span style={{ fontSize: 12, fontFamily: "monospace", color: systems[activeSystem].color, fontWeight: "bold" }}>{imp.value}</span>
+              </div>
+              <div style={{ fontSize: 12, color: "#64748b", lineHeight: 1.5 }}>{imp.desc}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Timeline({ desk }) {
+  return (
+    <div>
+      <SectionTitle color={COLOR}>Timeline</SectionTitle>
+
+      <div style={{ fontSize: 11, color: COLOR, letterSpacing: 3, fontFamily: "monospace", marginBottom: 16, paddingBottom: 8, borderBottom: `1px solid ${COLOR}22` }}>PARTIE 1 — EFFETS ACTIFS & CRASH DOPAMINERGIQUE</div>
+
+      <div style={{ marginBottom: 32 }}>
+        <div style={{ fontSize: 11, color: COLOR, letterSpacing: 2, fontFamily: "monospace", marginBottom: 6 }}>DOPAMINE — FLASH, CRASH ET RÉCUPÉRATION</div>
+        <div style={{ fontSize: 11, color: "#475569", marginBottom: 14, lineHeight: 1.5 }}>Niveau relatif à la baseline (100%). Le crash post-héroïne plonge sous la normale pendant des mois.</div>
+        <Card color={COLOR}>
+          <ResponsiveContainer width="100%" height={220}>
+            <AreaChart data={dopamineData} margin={{ top: 10, right: 10, bottom: 5, left: -10 }}>
+              <defs>
+                <linearGradient id="her-normalGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#22c55e" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="#22c55e" stopOpacity={0} />
+                </linearGradient>
+                <linearGradient id="her-drugGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor={COLOR} stopOpacity={0.4} />
+                  <stop offset="95%" stopColor={COLOR} stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="#1e1e3a" />
+              <XAxis dataKey="time" tick={{ fontSize: 9, fill: "#475569" }} />
+              <YAxis tick={{ fontSize: 9, fill: "#475569" }} />
+              <Tooltip content={<DopaTip />} />
+              <ReferenceLine y={100} stroke="#475569" strokeDasharray="3 3" />
+              <Legend wrapperStyle={{ fontSize: 11, color: "#64748b" }} />
+              <Area type="monotone" dataKey="normal" stroke="#22c55e" fill="url(#her-normalGrad)" strokeWidth={2} name="Baseline saine" dot={false} />
+              <Area type="monotone" dataKey="drug" stroke={COLOR} fill="url(#her-drugGrad)" strokeWidth={2} name="Post-héroïne" dot={false} />
+            </AreaChart>
+          </ResponsiveContainer>
+        </Card>
+      </div>
+
+      <div style={{ fontSize: 11, color: "#22c55e", letterSpacing: 3, fontFamily: "monospace", marginBottom: 16, marginTop: 8, paddingBottom: 8, borderBottom: "1px solid #22c55e22" }}>PARTIE 2 — ARRÊT & RÉCUPÉRATION ENDORPHINIQUE</div>
+
+      <div>
+        <div style={{ fontSize: 11, color: "#34d399", letterSpacing: 2, fontFamily: "monospace", marginBottom: 6 }}>ENDORPHINES ENDOGÈNES VS OPIOÏDES EXOGÈNES</div>
+        <div style={{ fontSize: 11, color: "#475569", marginBottom: 14, lineHeight: 1.5 }}>Le cerveau arrête de produire ses propres endorphines avec l'usage. La récupération prend 6-18 mois après l'arrêt.</div>
+        <Card color="#34d399">
+          <ResponsiveContainer width="100%" height={220}>
+            <AreaChart data={endorphinData} margin={{ top: 10, right: 10, bottom: 5, left: -10 }}>
+              <defs>
+                <linearGradient id="her-endoGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#34d399" stopOpacity={0.4} />
+                  <stop offset="95%" stopColor="#34d399" stopOpacity={0} />
+                </linearGradient>
+                <linearGradient id="her-exoGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#f87171" stopOpacity={0.4} />
+                  <stop offset="95%" stopColor="#f87171" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="#1e1e3a" />
+              <XAxis dataKey="time" tick={{ fontSize: 9, fill: "#475569" }} />
+              <YAxis tick={{ fontSize: 9, fill: "#475569" }} />
+              <Tooltip content={<EndoTip />} />
+              <Legend wrapperStyle={{ fontSize: 11, color: "#64748b" }} />
+              <Area type="monotone" dataKey="endogenes" stroke="#34d399" fill="url(#her-endoGrad)" strokeWidth={2} name="Endorphines naturelles" dot={false} />
+              <Area type="monotone" dataKey="exogenes" stroke="#f87171" fill="url(#her-exoGrad)" strokeWidth={2} name="Opioïdes exogènes" dot={false} />
+            </AreaChart>
+          </ResponsiveContainer>
+        </Card>
+      </div>
+
+      <div style={{ marginTop: 28 }}>
+        <div style={{ fontSize: 11, color: "#475569", letterSpacing: 2, fontFamily: "monospace", marginBottom: 16 }}>PHASES DU SEVRAGE</div>
+        <div style={{ display: "grid", gridTemplateColumns: desk ? "1fr 1fr 1fr" : "1fr", gap: 12 }}>
+          {timeline.map((d, i) => (
+            <div key={i} style={{ background: "#0d0d1a", border: `1px solid ${d.color}33`, borderRadius: 12, padding: 16 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
+                <span style={{ fontSize: 20 }}>{d.icon}</span>
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: "bold", color: d.color }}>{d.day}</div>
+                  <div style={{ fontSize: 10, color: "#64748b", fontFamily: "monospace" }}>{d.phase}</div>
+                </div>
+              </div>
+              {d.items.map((item, j) => (
+                <div key={j} style={{ fontSize: 11, color: "#94a3b8", marginBottom: 4, paddingLeft: 8, borderLeft: `2px solid ${d.color}44`, lineHeight: 1.5 }}>{item}</div>
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Neurochimie({ desk }) {
+  return (
+    <div>
+      <SectionTitle color={COLOR}>Neurochimie — Dopamine & Hormones</SectionTitle>
+      <div style={{ fontSize: 11, color: "#475569", letterSpacing: 2, fontFamily: "monospace", marginBottom: 14 }}>TABLEAU HORMONAL — USAGE CHRONIQUE</div>
+      <div style={{ display: "grid", gridTemplateColumns: desk ? "1fr 1fr 1fr" : "1fr", gap: 10, marginBottom: 24 }}>
+        {[
+          { hormone: "Testostérone", effet: "−60 à −70%", duree: "Chronique", impact: "Hypogonadisme opioïde — libido, masse musculaire, énergie", color: "#f97316" },
+          { hormone: "Endorphines endogènes", effet: "Quasi nulles", duree: "Usage régulier", impact: "Incapacité à ressentir plaisir et gestion de la douleur naturels", color: COLOR },
+          { hormone: "Cortisol", effet: "↑↑ en sevrage", duree: "Pics 72h sevrage", impact: "Anxiété intense, hyperalgésie, hyperactivation SNA", color: "#ef4444" },
+          { hormone: "GH (croissance)", effet: "Supprimée", duree: "Usage chronique", impact: "Récupération musculaire, sommeil profond altérés", color: "#6366f1" },
+          { hormone: "Prolactine", effet: "↑↑", duree: "Usage chronique", impact: "Dysfonction sexuelle, troubles menstruels, galactorrhée", color: "#f87171" },
+          { hormone: "Dopamine baseline", effet: "↓↓ sous 100%", duree: "Mois post-arrêt", impact: "Anhedonia — rien ne procure de plaisir, risque rechute élevé", color: "#a855f7" },
+        ].map((h, i) => (
+          <div key={i} style={{ background: "#0d0d1a", border: "1px solid #1e1e3a", borderRadius: 10, padding: 14, borderLeft: `3px solid ${h.color}` }}>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
+              <span style={{ fontSize: 13, fontWeight: "bold", color: h.color }}>{h.hormone}</span>
+              <span style={{ fontSize: 12, fontFamily: "monospace", color: "#e2e8f0", fontWeight: "bold" }}>{h.effet}</span>
+            </div>
+            <div style={{ fontSize: 11, color: "#94a3b8", marginBottom: 4 }}>{h.impact}</div>
+            <div style={{ fontSize: 10, color: "#475569", fontFamily: "monospace" }}>Durée : {h.duree}</div>
+          </div>
+        ))}
+      </div>
+      <Card color={COLOR}>
+        <div style={{ fontSize: 11, color: COLOR, letterSpacing: 2, fontFamily: "monospace", marginBottom: 14 }}>MÉCANISME NEUROCHIMIQUE — DÉPENDANCE PHYSIQUE</div>
+        <div style={{ display: "grid", gridTemplateColumns: desk ? "1fr 1fr" : "1fr", gap: 14 }}>
+          {[
+            { title: "Régulation négative des récepteurs µ", desc: "Avec une exposition répétée, le cerveau diminue le nombre et la sensibilité des récepteurs opioïdes. Des doses croissantes sont nécessaires pour le même effet — tolérance." },
+            { title: "Suppression de la production endogène", desc: "La dynorphine et les enképhalines (opioïdes naturels) voient leur synthèse coupée. Le cerveau délègue à la substance exogène." },
+            { title: "Hyperactivité noradrénergique", desc: "Le locus coeruleus (LC) est suractivé en sevrage. Douleurs, sueurs, hypertension, anxiété — tout le système nerveux sympathique s'emballe." },
+            { title: "Anhedonia post-sevrage", desc: "Le système dopaminergique reste sous la normale des semaines à mois. Rien ne procure de plaisir — vulnérabilité maximale à la rechute." },
+          ].map((m, i) => (
+            <div key={i} style={{ background: "#060610", borderRadius: 10, padding: 14 }}>
+              <div style={{ fontSize: 12, color: COLOR, marginBottom: 6, fontWeight: "bold" }}>{m.title}</div>
+              <div style={{ fontSize: 12, color: "#94a3b8", lineHeight: 1.5 }}>{m.desc}</div>
+            </div>
+          ))}
+        </div>
+      </Card>
+    </div>
+  );
+}
+
+function Risks({ desk }) {
+  return (
+    <div>
+      <SectionTitle color={COLOR}>Overdose & Sevrage — informations critiques</SectionTitle>
+      <div style={{ background: "#1a0014", border: "2px solid #ef444488", borderRadius: 14, padding: 20, marginBottom: 24 }}>
+        <div style={{ fontSize: 14, color: "#ef4444", fontWeight: "bold", marginBottom: 10 }}>OVERDOSE — RECONNAÎTRE ET RÉAGIR</div>
+        <div style={{ display: "grid", gridTemplateColumns: desk ? "1fr 1fr" : "1fr", gap: 16 }}>
+          <div>
+            <div style={{ fontSize: 12, color: "#f87171", fontWeight: "bold", marginBottom: 8 }}>Signes d'overdose :</div>
+            {["Lèvres et ongles bleus (cyanose)", "Respiration très lente, bruyante ou absente", "Pupilles en points fixes", "Inconscience, impossible à réveiller", "Teint grisâtre, corps flasque"].map((s, i) => (
+              <div key={i} style={{ fontSize: 12, color: "#94a3b8", marginBottom: 4 }}>⚡ {s}</div>
+            ))}
+          </div>
+          <div>
+            <div style={{ fontSize: 12, color: "#22c55e", fontWeight: "bold", marginBottom: 8 }}>Que faire immédiatement :</div>
+            {["Appeler le 15 (SAMU) ou 112", "Administrer la naloxone (Narcan) si disponible", "Position latérale de sécurité", "Pratiquer la ventilation si nécessaire", "Ne jamais laisser seule une personne en OD"].map((s, i) => (
+              <div key={i} style={{ fontSize: 12, color: "#94a3b8", marginBottom: 4 }}>✓ {s}</div>
+            ))}
+          </div>
+        </div>
+        <div style={{ marginTop: 14, padding: 12, background: "#060610", borderRadius: 8, fontSize: 12, color: "#22c55e" }}>
+          La naloxone (Narcan) est un antidote opioïde disponible en pharmacie sans ordonnance. Elle inverse l'overdose en 2-5 minutes. En posséder une peut sauver une vie.
+        </div>
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: desk ? "1fr 1fr" : "1fr", gap: 20 }}>
+        <div>
+          <div style={{ fontSize: 11, color: "#475569", letterSpacing: 2, fontFamily: "monospace", marginBottom: 14 }}>SYNDROME DE SEVRAGE — INTENSITÉ</div>
+          {[
+            { time: "6-12h", level: 20, color: "#fbbf24", label: "Début — agitation, larmoiements" },
+            { time: "12-24h", level: 55, color: "#f97316", label: "Modéré — douleurs, nausées" },
+            { time: "24-48h", level: 90, color: "#ef4444", label: "Pic — souffrance sévère" },
+            { time: "48-72h", level: 80, color: "#f87171", label: "Intense — vomissements, crampes" },
+            { time: "3-5j", level: 50, color: "#fb923c", label: "Déclin — encore difficile" },
+            { time: "1 semaine", level: 25, color: "#fbbf24", label: "Résiduel — fatigue, insomnie" },
+            { time: "1 mois", level: 10, color: "#84cc16", label: "Stable — PAWS possible" },
+          ].map((item, i) => (
+            <div key={i} style={{ marginBottom: 8 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, marginBottom: 3 }}>
+                <span style={{ color: "#64748b", fontFamily: "monospace" }}>{item.time}</span>
+                <span style={{ color: item.color, fontSize: 10 }}>{item.label}</span>
+              </div>
+              <div style={{ height: 8, background: "#1e1e3a", borderRadius: 4 }}>
+                <div style={{ width: `${item.level}%`, height: "100%", background: item.color, borderRadius: 4, opacity: 0.8 }} />
+              </div>
+            </div>
+          ))}
+        </div>
+        <div>
+          <div style={{ fontSize: 11, color: "#475569", letterSpacing: 2, fontFamily: "monospace", marginBottom: 14 }}>TRAITEMENT DE SUBSTITUTION</div>
+          {[
+            { drug: "Méthadone", class: "Agoniste µ complet", use: "Réduction risques + sevrage progressif. Demi-vie longue (24-36h) = 1 prise/j.", color: "#22c55e" },
+            { drug: "Buprénorphine (Subutex)", class: "Agoniste µ partiel", use: "Standard en France. Moins d'abus potentiel. Combinée avec naloxone (Suboxone).", color: "#06b6d4" },
+            { drug: "Naltrexone", class: "Antagoniste µ", use: "Bloque l'effet des opioïdes. Utilisé après sevrage pour prévenir rechute.", color: "#a855f7" },
+          ].map((t, i) => (
+            <div key={i} style={{ background: "#0d0d1a", border: `1px solid ${t.color}33`, borderRadius: 12, padding: 14, marginBottom: 10 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                <span style={{ fontSize: 14, fontWeight: "bold", color: t.color }}>{t.drug}</span>
+                <span style={{ fontSize: 10, color: "#64748b", fontFamily: "monospace" }}>{t.class}</span>
+              </div>
+              <div style={{ fontSize: 12, color: "#94a3b8", lineHeight: 1.5 }}>{t.use}</div>
+            </div>
+          ))}
+          <Card color="#475569">
+            <div style={{ fontSize: 11, color: "#64748b", lineHeight: 1.6 }}>Le sevrage de l'héroïne n'est pas fatal en lui-même, mais la souffrance intense entraîne souvent une rechute. La substitution médicale est plus efficace que le sevrage brutal — elle réduit la mortalité et améliore les chances de récupération à long terme.</div>
+          </Card>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Safety({ desk }) {
+  return (
+    <div>
+      <SectionTitle color={COLOR}>Sécurité — récupération & ressources</SectionTitle>
+      <div style={{ display: "grid", gridTemplateColumns: desk ? "1fr 1fr" : "1fr", gap: 24 }}>
+        <div>
+          <div style={{ fontSize: 11, color: "#475569", letterSpacing: 2, fontFamily: "monospace", marginBottom: 14 }}>BÉNÉFICES DANS LE TEMPS</div>
+          {stopBenefits.map((period, i) => (
+            <div key={i} style={{ display: "flex", gap: 12, marginBottom: 12 }}>
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+                <div style={{ width: 10, height: 10, borderRadius: "50%", background: period.color, flexShrink: 0, marginTop: 4 }} />
+                {i < stopBenefits.length - 1 && <div style={{ width: 2, flex: 1, background: `linear-gradient(${period.color}, ${stopBenefits[i+1].color})`, opacity: 0.3, minHeight: 30 }} />}
+              </div>
+              <div style={{ flex: 1, background: "#0d0d1a", border: `1px solid ${period.color}22`, borderRadius: 10, padding: 12 }}>
+                <div style={{ fontSize: 11, color: period.color, fontFamily: "monospace", fontWeight: "bold", marginBottom: 6 }}>{period.period}</div>
+                {period.benefits.map((b, j) => (
+                  <div key={j} style={{ fontSize: 12, color: "#94a3b8", marginBottom: 3 }}>✓ {b}</div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+        <div>
+          <div style={{ fontSize: 11, color: "#475569", letterSpacing: 2, fontFamily: "monospace", marginBottom: 14 }}>SOUTIEN & RESSOURCES</div>
+          {[
+            { icon: "🏥", tip: "Consultation addictologie", desc: "Médecin ou structure spécialisée (CSAPA) — traitement de substitution et suivi médical." },
+            { icon: "☎️", tip: "Drogues Info Service : 0800 23 13 13", desc: "Ligne gratuite, anonyme, 7j/7. Conseil, orientation, écoute." },
+            { icon: "👥", tip: "Narcotics Anonymous (NA)", desc: "Groupes de parole entre pairs. Présents dans toute la France. Efficacité reconnue." },
+            { icon: "🧠", tip: "Thérapie cognitivo-comportementale", desc: "La TCC réduit les rechutes en changeant les patterns de pensée liés à l'usage." },
+            { icon: "🏃", tip: "Activité physique intensive", desc: "L'exercice libère des endorphines naturelles — aide à reconstruire le système de récompense." },
+          ].map((t, i) => (
+            <div key={i} style={{ background: "#0d0d1a", border: "1px solid #1e1e3a", borderRadius: 12, padding: 14, marginBottom: 10, display: "flex", gap: 12 }}>
+              <div style={{ fontSize: 22, flexShrink: 0 }}>{t.icon}</div>
+              <div>
+                <div style={{ fontSize: 13, fontWeight: "bold", color: "#e2e8f0", marginBottom: 4 }}>{t.tip}</div>
+                <div style={{ fontSize: 12, color: "#64748b", lineHeight: 1.5 }}>{t.desc}</div>
+              </div>
+            </div>
+          ))}
+          <Card color={COLOR}>
+            <div style={{ fontSize: 12, color: COLOR, fontWeight: "bold", marginBottom: 8 }}>La neuroplasticité comme espoir</div>
+            <div style={{ fontSize: 12, color: "#94a3b8", lineHeight: 1.7 }}>Le cerveau se répare. Les circuits dopaminergiques endommagés se reconstruisent sur 12 à 24 mois d'abstinence. La capacité à ressentir du plaisir naturel revient progressivement. La récupération est réelle et mesurable en neuroimagerie.</div>
+          </Card>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Sources({ desk }) {
+  const refs = [
+    { authors: "Nutt DJ et al.", title: "Drug harms in the UK: a multicriteria decision analysis", journal: "The Lancet", year: "2010", url: "https://www.thelancet.com/journals/lancet/article/PIIS0140-6736(10)61462-6/fulltext" },
+    { authors: "Bhatt DL et al.", title: "Altered Accumbal Dopamine Terminal Dynamics Following Chronic Heroin Self-Administration", journal: "PMC / Neuropsychopharmacology", year: "2022", url: "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9332320/" },
+    { authors: "Huang C et al.", title: "Heroin Regulates SCN1b to Modulate Nucleus Accumbens Medium Spiny Neuron Intrinsic Excitability and Cue-Induced Heroin Seeking", journal: "PMC", year: "2025", url: "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11913320/" },
+    { authors: "Leyton M.", title: "Learning from opioid withdrawal: Effects on striatal dopamine", journal: "European Journal of Neuroscience", year: "2024", url: "https://onlinelibrary.wiley.com/doi/10.1111/ejn.16235" },
+    { authors: "Jain R et al.", title: "Opioid use disorder: current trends and potential treatments", journal: "Frontiers in Public Health", year: "2023", url: "https://www.frontiersin.org/journals/public-health/articles/10.3389/fpubh.2023.1274719/full" },
+  ];
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+      <SectionTitle color={COLOR}>Sources & Références scientifiques</SectionTitle>
+      <div style={{ background: `${COLOR}10`, border: `1px solid ${COLOR}33`, borderRadius: 12, padding: 20 }}>
+        <div style={{ fontSize: 12, color: COLOR, fontFamily: "monospace", marginBottom: 8 }}>PEER-REVIEWED · OMS · PUBMED · NIH</div>
+        <p style={{ color: "#94a3b8", fontSize: 13, lineHeight: 1.7, margin: 0 }}>
+          Toutes les données présentées sont issues de publications scientifiques révisées par les pairs (2010–2025).
+          Les études récentes ont été priorisées pour refléter l'état actuel des connaissances.
+        </p>
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        {refs.map((r, i) => (
+          <a key={i} href={r.url} target="_blank" rel="noopener noreferrer" style={{
+            display: "block", background: "#0d0d1a", border: `1px solid ${COLOR}22`,
+            borderRadius: 10, padding: "14px 18px", textDecoration: "none", transition: "border-color 0.2s",
+          }}
+          onMouseEnter={e => e.currentTarget.style.borderColor = COLOR + "55"}
+          onMouseLeave={e => e.currentTarget.style.borderColor = COLOR + "22"}
+          >
+            <div style={{ fontSize: 12, color: "#e2e8f0", marginBottom: 4 }}>
+              {r.authors} · <span style={{ color: COLOR }}>{r.journal}</span> · {r.year}
+            </div>
+            <div style={{ fontSize: 11, color: "#64748b", lineHeight: 1.5, fontStyle: "italic" }}>{r.title}</div>
+          </a>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export default function Heroine({ onBack }) {
+  const [section, setSection] = useState("overview");
   const w = useWidth();
   const desk = w >= 768;
+
+  const renderSection = () => {
+    switch (section) {
+      case "overview": return <Overview desk={desk} />;
+      case "immediate": return <Immediate desk={desk} />;
+      case "systems": return <Systems desk={desk} />;
+      case "timeline": return <Timeline desk={desk} />;
+      case "hormones": return <Neurochimie desk={desk} />;
+      case "risks": return <Risks desk={desk} />;
+      case "stop": return <Safety desk={desk} />;
+      case "sources": return <Sources desk={desk} />;
+      default: return null;
+    }
+  };
 
   return (
     <div style={{ minHeight: "100vh", background: "#060610", fontFamily: "'Georgia','Times New Roman',serif", color: "#e2e8f0" }}>
@@ -147,418 +579,53 @@ export default function Heroine({ onBack }) {
         <div style={{ position: "absolute", top: -60, right: -60, width: 280, height: 280, borderRadius: "50%", background: "radial-gradient(circle, #a855f718 0%, transparent 70%)" }} />
         <div style={{ position: "relative", maxWidth: 900, margin: "0 auto" }}>
           <button onClick={onBack} style={{ background: "none", border: "1px solid #2d1b4e", borderRadius: 8, color: "#64748b", padding: "6px 14px", fontSize: 12, cursor: "pointer", fontFamily: "monospace", marginBottom: 16 }}>
-            ← Choisir une substance
+            ← Retour
           </button>
-          <div style={{ fontSize: 10, letterSpacing: 4, textTransform: "uppercase", color: COLOR, marginBottom: 10, fontFamily: "monospace" }}>GUIDE SCIENTIFIQUE · #2 OMS · 55/100</div>
+          <div style={{ display: "inline-block", background: COLOR + "22", border: `1px solid ${COLOR}44`, borderRadius: 20, padding: "4px 14px", fontSize: 11, color: COLOR, fontFamily: "monospace", letterSpacing: 1, marginBottom: 12 }}>
+            OPIOÏDE SEMI-SYNTHÉTIQUE · #2 OMS · 55/100
+          </div>
           <h1 style={{
             fontSize: desk ? 38 : 26, fontWeight: "bold", margin: "0 0 10px", lineHeight: 1.2,
-            background: "linear-gradient(135deg, #fff 40%, #a855f7)",
+            background: `linear-gradient(135deg, #fff 40%, ${COLOR})`,
             WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
           }}>
-            Héroïne — opioïde semi-synthétique
+            💉 Héroïne
           </h1>
-          <p style={{ fontSize: desk ? 15 : 13, color: "#64748b", margin: 0, lineHeight: 1.7, maxWidth: 600 }}>
+          <p style={{ fontSize: desk ? 15 : 13, color: "#64748b", margin: "0 0 20px", lineHeight: 1.7, maxWidth: 600 }}>
             Dépendance physique extrême, dépression respiratoire et effondrement du système endorphinique endogène.
           </p>
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+            {[
+              { label: "+200% dopamine", color: COLOR },
+              { label: "Dépendance 2-3 sem", color: "#f97316" },
+              { label: "−70% testostérone", color: "#f87171" },
+              { label: "Overdose létale", color: "#ef4444" },
+            ].map((b, i) => (
+              <div key={i} style={{ background: "#0d0d1a", border: `1px solid ${b.color}33`, borderRadius: 20, padding: "4px 12px", fontSize: 11, color: b.color, fontFamily: "monospace" }}>
+                {b.label}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
-      <div style={{
-        overflowX: "auto", display: "flex", gap: 8,
-        padding: desk ? "14px 48px" : "10px 16px",
-        borderBottom: "1px solid #1e1e3a", scrollbarWidth: "none",
-        justifyContent: desk ? "center" : "flex-start",
-      }}>
-        {NAV.map(n => (
-          <button key={n.id} onClick={() => setActiveNav(n.id)} style={{
-            flexShrink: 0, padding: desk ? "7px 16px" : "6px 12px",
-            borderRadius: 20, border: "1px solid",
-            borderColor: activeNav === n.id ? COLOR : "#1e1e3a",
-            background: activeNav === n.id ? COLOR + "22" : "transparent",
-            color: activeNav === n.id ? COLOR : "#64748b",
-            fontSize: desk ? 12 : 11, cursor: "pointer", whiteSpace: "nowrap",
-            fontFamily: "monospace", letterSpacing: 0.5,
-          }}>
-            {n.icon} {n.label}
-          </button>
-        ))}
+      <div style={{ background: "#0a0a14", borderBottom: "1px solid #1e1e3a", overflowX: "auto" }}>
+        <div style={{ display: "flex", gap: 0, maxWidth: 900, margin: "0 auto", padding: "0 20px" }}>
+          {NAV.map((n) => (
+            <button key={n.id} onClick={() => setSection(n.id)} style={{
+              background: "none", border: "none", borderBottom: section === n.id ? `2px solid ${COLOR}` : "2px solid transparent",
+              color: section === n.id ? COLOR : "#64748b",
+              padding: "14px 16px", cursor: "pointer", fontSize: 12,
+              fontFamily: "monospace", whiteSpace: "nowrap", transition: "color 0.2s",
+            }}>
+              {n.label}
+            </button>
+          ))}
+        </div>
       </div>
 
-      <div style={{ maxWidth: 1100, margin: "0 auto", padding: desk ? "36px 48px" : "20px 16px" }}>
-
-        {activeNav === "overview" && (
-          <div>
-            <SectionTitle color={COLOR}>Vue d'ensemble</SectionTitle>
-            <div style={{ display: "grid", gridTemplateColumns: desk ? "1fr 1fr" : "1fr", gap: 24, marginBottom: 24 }}>
-              <div style={{ background: "#1a0530", border: `1px solid ${COLOR}33`, borderRadius: 14, padding: 20 }}>
-                <div style={{ fontSize: 11, color: COLOR, letterSpacing: 2, fontFamily: "monospace", marginBottom: 16 }}>PROFIL PHARMACOLOGIQUE</div>
-                {[
-                  { label: "Classe", value: "Opioïde semi-synthétique (diacétylmorphine)" },
-                  { label: "Mécanisme", value: "Agoniste µ-opioïde (MOR) — récepteurs endorphines" },
-                  { label: "Onset (IV)", value: "8-30 secondes — flash immédiat" },
-                  { label: "Durée du high", value: "4-6 heures" },
-                  { label: "Dépendance physique", value: "Après 2-3 semaines d'usage régulier" },
-                  { label: "Potentiel addictif", value: "#2 mondial (OMS)" },
-                ].map((item, i) => (
-                  <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 10, paddingBottom: 10, borderBottom: i < 5 ? "1px solid #2d1b4e" : "none" }}>
-                    <span style={{ fontSize: 12, color: "#64748b", flexShrink: 0, width: "40%" }}>{item.label}</span>
-                    <span style={{ fontSize: 12, color: "#e2e8f0", textAlign: "right" }}>{item.value}</span>
-                  </div>
-                ))}
-              </div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-                {[
-                  { val: "+200%", label: "Dopamine nucleus accumbens", sub: "vs toute expérience naturelle", color: COLOR },
-                  { val: "2-3 sem", label: "Dépendance physique", sub: "avec usage régulier", color: "#f97316" },
-                  { val: "−70%", label: "Testostérone", sub: "hypogonadisme opioïde", color: "#f87171" },
-                  { val: "1/3", label: "Risque dépendance vie", sub: "si usage régulier amorcé", color: "#fb923c" },
-                  { val: "72h", label: "Pic sevrage", sub: "syndrome cold turkey", color: "#a855f7" },
-                  { val: "12-24m", label: "Récupération complète", sub: "circuits dopamine", color: "#22c55e" },
-                ].map((s, i) => (
-                  <div key={i} style={{ background: "#0d0d1a", border: "1px solid #1e1e3a", borderRadius: 12, padding: 14, textAlign: "center" }}>
-                    <div style={{ fontSize: desk ? 20 : 16, fontWeight: "bold", color: s.color, marginBottom: 4, fontFamily: "monospace" }}>{s.val}</div>
-                    <div style={{ fontSize: 11, color: "#e2e8f0", marginBottom: 3 }}>{s.label}</div>
-                    <div style={{ fontSize: 10, color: "#475569" }}>{s.sub}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <Card color={COLOR}>
-              <div style={{ fontSize: 11, color: COLOR, letterSpacing: 2, fontFamily: "monospace", marginBottom: 14 }}>MÉCANISME CENTRAL — POURQUOI C'EST SI ADDICTIF</div>
-              <div style={{ display: "grid", gridTemplateColumns: desk ? "1fr 1fr 1fr" : "1fr", gap: 14 }}>
-                {[
-                  { title: "Le système opioïde endogène", desc: "Ton cerveau produit naturellement des endorphines qui se fixent aux récepteurs opioïdes — pour gérer la douleur, l'effort, le plaisir social. L'héroïne simule ce système avec une intensité 10-100× supérieure." },
-                  { title: "L'effondrement endogène", desc: "Avec l'usage régulier, le cerveau réduit sa production d'endorphines (régulation négative). Tu deviens dépendant de l'apport externe juste pour te sentir normal — pas pour te sentir bien." },
-                  { title: "Le sevrage comme anti-plaisir", desc: "Le sevrage n'est pas l'absence de plaisir, c'est l'activation active du système douleur/stress. Douleurs osseuses, nausées, anxiété extrême — le cerveau purifie sa chimie en sens inverse." },
-                ].map((m, i) => (
-                  <div key={i} style={{ background: "#060610", borderRadius: 10, padding: 14 }}>
-                    <div style={{ fontSize: 12, color: COLOR, marginBottom: 6, fontWeight: "bold" }}>{m.title}</div>
-                    <div style={{ fontSize: 12, color: "#94a3b8", lineHeight: 1.5 }}>{m.desc}</div>
-                  </div>
-                ))}
-              </div>
-            </Card>
-          </div>
-        )}
-
-        {activeNav === "immediate" && (
-          <div>
-            <SectionTitle color={COLOR}>Effets immédiats — de l'injection au manque</SectionTitle>
-            <div style={{ display: "grid", gridTemplateColumns: desk ? "1fr 1fr" : "1fr", gap: 14 }}>
-              {[
-                { time: "0–30 sec (IV)", color: "#a855f7", icon: "⚡", title: "Le Flash", events: ["Chaleur intense qui monte de l'abdomen au crâne", "Euphorie absolue — toute douleur physique et psychologique disparaît", "Sensation de bien-être total, plénitude", "Récepteurs µ-opioïdes saturés en secondes", "Dopamine +200% dans le nucleus accumbens"] },
-                { time: "5–30 min", color: "#8b5cf6", icon: "🌊", title: "L'Euphorie", events: ["Sensation de paix profonde, chaleur corporelle", "Détachement du monde extérieur", "Analgésie totale — plus aucune douleur", "Nausées possibles (activation trigone area)", "Conscience intacte mais altérée"] },
-                { time: "1–4h", color: "#6366f1", icon: "😴", title: "Le 'Nod'", events: ["Semi-conscience — oscillation entre éveil et somnolence", "Euphorie qui décline progressivement", "Corps lourd, muscles relâchés", "Respiration ralentie — risque si forte dose", "Pupilles en points (myosis)"] },
-                { time: "4–8h", color: "#f97316", icon: "⬇️", title: "La Descente", events: ["Disparition progressive de l'euphorie", "Retour de la conscience normale", "Premiers signaux de manque si dépendant", "Anxiété légère, inconfort croissant", "Besoin psychologique de redoser"] },
-                { time: "8–24h (sevrage)", color: "#ef4444", icon: "🆘", title: "Syndrome de sevrage", events: ["Larmoiements, éternuements, sueurs froides", "Douleurs musculaires et osseuses", "Diarrhée, nausées, vomissements", "Anxiété intense, insomnie, agitation", "Craving écrasant — tout le corps réclame"] },
-              ].map((phase, i) => (
-                <div key={i} style={{ background: "#0d0d1a", border: `1px solid ${phase.color}22`, borderRadius: 12, padding: 16 }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-                    <span style={{ fontSize: 20 }}>{phase.icon}</span>
-                    <div style={{ textAlign: "right" }}>
-                      <div style={{ fontSize: 14, fontWeight: "bold", color: "#e2e8f0" }}>{phase.title}</div>
-                      <div style={{ fontSize: 10, color: phase.color, fontFamily: "monospace" }}>{phase.time}</div>
-                    </div>
-                  </div>
-                  {phase.events.map((e, j) => (
-                    <div key={j} style={{ fontSize: 12, color: "#94a3b8", marginBottom: 5, paddingLeft: 10, borderLeft: `2px solid ${phase.color}44`, lineHeight: 1.5 }}>{e}</div>
-                  ))}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {activeNav === "systems" && (
-          <div>
-            <SectionTitle color={COLOR}>Systèmes biologiques affectés</SectionTitle>
-            <div style={{ display: "flex", gap: 10, marginBottom: 20, flexWrap: "wrap" }}>
-              {systems.map((s, i) => (
-                <button key={i} onClick={() => setActiveSystem(i)} style={{
-                  padding: "8px 18px", borderRadius: 20,
-                  border: `1.5px solid ${activeSystem === i ? s.color : "#1e1e3a"}`,
-                  background: activeSystem === i ? s.color + "22" : "transparent",
-                  color: activeSystem === i ? s.color : "#64748b",
-                  fontSize: 13, cursor: "pointer", whiteSpace: "nowrap",
-                }}>
-                  {s.icon} {s.title}
-                </button>
-              ))}
-            </div>
-            <div style={{ background: "#0d0d1a", border: `1px solid ${systems[activeSystem].color}33`, borderRadius: 14, padding: 24 }}>
-              <div style={{ fontSize: 18, fontWeight: "bold", color: systems[activeSystem].color, marginBottom: 20 }}>
-                {systems[activeSystem].icon} {systems[activeSystem].title}
-              </div>
-              <div style={{ display: "grid", gridTemplateColumns: desk ? "1fr 1fr" : "1fr", gap: 12 }}>
-                {systems[activeSystem].impacts.map((imp, i) => (
-                  <div key={i} style={{ padding: 14, background: "#060610", borderRadius: 10, borderLeft: `3px solid ${systems[activeSystem].color}66` }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-                      <span style={{ fontSize: 13, fontWeight: "bold", color: "#e2e8f0" }}>{imp.label}</span>
-                      <span style={{ fontSize: 12, fontFamily: "monospace", color: systems[activeSystem].color, fontWeight: "bold" }}>{imp.value}</span>
-                    </div>
-                    <div style={{ fontSize: 12, color: "#64748b", lineHeight: 1.5 }}>{imp.desc}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {activeNav === "timeline" && (
-          <div>
-            <SectionTitle color={COLOR}>Timeline du sevrage</SectionTitle>
-            <div style={{ display: "flex", gap: 8, marginBottom: 20, flexWrap: desk ? "wrap" : "nowrap", overflowX: desk ? "visible" : "auto", paddingBottom: 4 }}>
-              {timeline.map((d, i) => (
-                <button key={i} onClick={() => setActiveDay(i)} style={{
-                  flexShrink: 0, padding: "8px 14px", borderRadius: 10,
-                  border: `1.5px solid ${activeDay === i ? d.color : "#1e1e3a"}`,
-                  background: activeDay === i ? d.color + "22" : "transparent",
-                  color: activeDay === i ? d.color : "#64748b",
-                  fontSize: 12, cursor: "pointer", textAlign: "center",
-                }}>
-                  <div style={{ fontSize: 18 }}>{d.icon}</div>
-                  <div style={{ whiteSpace: "nowrap" }}>{d.day}</div>
-                </button>
-              ))}
-            </div>
-            <div style={{ display: "grid", gridTemplateColumns: desk ? "1fr 1fr" : "1fr", gap: 24 }}>
-              <div style={{ background: "#0d0d1a", border: `1px solid ${timeline[activeDay].color}33`, borderRadius: 14, padding: 20 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-                  <div>
-                    <div style={{ fontSize: 22 }}>{timeline[activeDay].icon}</div>
-                    <div style={{ fontSize: 18, fontWeight: "bold", color: timeline[activeDay].color }}>{timeline[activeDay].day}</div>
-                  </div>
-                  <div style={{ background: timeline[activeDay].color + "22", border: `1px solid ${timeline[activeDay].color}44`, borderRadius: 20, padding: "4px 14px", fontSize: 11, color: timeline[activeDay].color, fontFamily: "monospace" }}>
-                    {timeline[activeDay].phase}
-                  </div>
-                </div>
-                {timeline[activeDay].items.map((item, i) => (
-                  <div key={i} style={{ display: "flex", gap: 10, alignItems: "flex-start", marginBottom: 10, padding: 10, background: "#060610", borderRadius: 8 }}>
-                    <div style={{ width: 6, height: 6, borderRadius: "50%", background: timeline[activeDay].color, flexShrink: 0, marginTop: 5 }} />
-                    <div style={{ fontSize: 12, color: "#94a3b8", lineHeight: 1.5 }}>{item}</div>
-                  </div>
-                ))}
-              </div>
-              <div>
-                <div style={{ fontSize: 11, color: "#475569", letterSpacing: 2, fontFamily: "monospace", marginBottom: 16 }}>TRAITEMENT MÉDICAL DU SEVRAGE</div>
-                {[
-                  { step: "Méthadone ou Buprénorphine", color: COLOR, desc: "Substitution opioïde — réduit la souffrance du sevrage" },
-                  { step: "Clonidine", color: "#6366f1", desc: "Réduit l'hyperactivité noradrénergique en sevrage" },
-                  { step: "Loperamide", color: "#22d3ee", desc: "Diarrhée et crampes abdominales" },
-                  { step: "Naltrexone (post-sevrage)", color: "#22c55e", desc: "Bloque l'effet de l'héroïne — aide à la prévention rechute" },
-                  { step: "Suivi psychologique", color: "#84cc16", desc: "TCC, thérapie de remplacement — indispensable à long terme" },
-                ].map((item, i, arr) => (
-                  <div key={i} style={{ display: "flex", alignItems: "stretch" }}>
-                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: 28 }}>
-                      <div style={{ width: 10, height: 10, borderRadius: "50%", background: item.color, flexShrink: 0, marginTop: 12 }} />
-                      {i < arr.length - 1 && <div style={{ width: 2, flex: 1, background: item.color, opacity: 0.2, minHeight: 20 }} />}
-                    </div>
-                    <div style={{ padding: "8px 12px 8px 6px", flex: 1 }}>
-                      <div style={{ fontSize: 13, color: item.color, fontWeight: "bold" }}>{item.step}</div>
-                      <div style={{ fontSize: 11, color: "#64748b" }}>{item.desc}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {activeNav === "hormones" && (
-          <div>
-            <SectionTitle color={COLOR}>Dopamine & Système endorphinique</SectionTitle>
-            <div style={{ display: "grid", gridTemplateColumns: desk ? "1fr 1fr" : "1fr", gap: 24, marginBottom: 24 }}>
-              <Card color={COLOR}>
-                <div style={{ fontSize: 11, color: COLOR, letterSpacing: 2, fontFamily: "monospace", marginBottom: 6 }}>DOPAMINE — USAGE ET RÉCUPÉRATION</div>
-                <div style={{ fontSize: 11, color: "#475569", marginBottom: 16, lineHeight: 1.5 }}>Niveau relatif à la baseline (100%). Le crash post-héroïne plonge sous la normale.</div>
-                <ResponsiveContainer width="100%" height={200}>
-                  <AreaChart data={dopamineData} margin={{ top: 5, right: 5, bottom: 5, left: -20 }}>
-                    <defs>
-                      <linearGradient id="her-normalGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#22c55e" stopOpacity={0.3} /><stop offset="95%" stopColor="#22c55e" stopOpacity={0} />
-                      </linearGradient>
-                      <linearGradient id="her-drugGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor={COLOR} stopOpacity={0.4} /><stop offset="95%" stopColor={COLOR} stopOpacity={0} />
-                      </linearGradient>
-                    </defs>
-                    <XAxis dataKey="time" tick={{ fontSize: 8, fill: "#475569" }} />
-                    <YAxis tick={{ fontSize: 9, fill: "#475569" }} />
-                    <Tooltip content={<DopaTip />} />
-                    <ReferenceLine y={100} stroke="#475569" strokeDasharray="3 3" />
-                    <Area type="monotone" dataKey="normal" stroke="#22c55e" fill="url(#her-normalGrad)" strokeWidth={2} name="normal" dot={false} />
-                    <Area type="monotone" dataKey="drug" stroke={COLOR} fill="url(#her-drugGrad)" strokeWidth={2} name="drug" dot={false} />
-                  </AreaChart>
-                </ResponsiveContainer>
-                <div style={{ display: "flex", gap: 16, justifyContent: "center", marginTop: 8 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11 }}><div style={{ width: 16, height: 2, background: "#22c55e" }} /><span style={{ color: "#64748b" }}>Baseline saine</span></div>
-                  <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11 }}><div style={{ width: 16, height: 2, background: COLOR }} /><span style={{ color: "#64748b" }}>Post-héroïne</span></div>
-                </div>
-              </Card>
-              <Card color="#34d399">
-                <div style={{ fontSize: 11, color: "#34d399", letterSpacing: 2, fontFamily: "monospace", marginBottom: 6 }}>ENDORPHINES ENDOGÈNES VS EXOGÈNES</div>
-                <div style={{ fontSize: 11, color: "#475569", marginBottom: 16, lineHeight: 1.5 }}>Le cerveau arrête de produire ses propres endorphines. La récupération prend 6-18 mois.</div>
-                <ResponsiveContainer width="100%" height={200}>
-                  <AreaChart data={endorphinData} margin={{ top: 5, right: 5, bottom: 5, left: -20 }}>
-                    <defs>
-                      <linearGradient id="her-endoGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#34d399" stopOpacity={0.4} /><stop offset="95%" stopColor="#34d399" stopOpacity={0} />
-                      </linearGradient>
-                      <linearGradient id="her-exoGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#f87171" stopOpacity={0.4} /><stop offset="95%" stopColor="#f87171" stopOpacity={0} />
-                      </linearGradient>
-                    </defs>
-                    <XAxis dataKey="time" tick={{ fontSize: 8, fill: "#475569" }} />
-                    <YAxis tick={{ fontSize: 9, fill: "#475569" }} />
-                    <Tooltip content={<EndoTip />} />
-                    <Area type="monotone" dataKey="endogenes" stroke="#34d399" fill="url(#her-endoGrad)" strokeWidth={2} name="endogenes" dot={false} />
-                    <Area type="monotone" dataKey="exogenes" stroke="#f87171" fill="url(#her-exoGrad)" strokeWidth={2} name="exogenes" dot={false} />
-                  </AreaChart>
-                </ResponsiveContainer>
-                <div style={{ display: "flex", gap: 16, justifyContent: "center", marginTop: 8 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11 }}><div style={{ width: 16, height: 2, background: "#34d399" }} /><span style={{ color: "#64748b" }}>Endorphines naturelles</span></div>
-                  <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11 }}><div style={{ width: 16, height: 2, background: "#f87171" }} /><span style={{ color: "#64748b" }}>Opioïdes exogènes</span></div>
-                </div>
-              </Card>
-            </div>
-            <div style={{ fontSize: 11, color: "#475569", letterSpacing: 2, fontFamily: "monospace", marginBottom: 14 }}>TABLEAU HORMONAL — USAGE CHRONIQUE</div>
-            <div style={{ display: "grid", gridTemplateColumns: desk ? "1fr 1fr 1fr" : "1fr", gap: 10 }}>
-              {[
-                { hormone: "Testostérone", effet: "−60 à −70%", duree: "Chronique", impact: "Hypogonadisme opioïde — libido, masse musculaire, énergie", color: "#f97316" },
-                { hormone: "Endorphines endogènes", effet: "Quasi nulles", duree: "Usage régulier", impact: "Incapacité à ressentir plaisir et gestion de la douleur naturels", color: COLOR },
-                { hormone: "Cortisol", effet: "↑↑ en sevrage", duree: "Pics 72h sevrage", impact: "Anxiété intense, hyperalgésie, hyperactivation SNA", color: "#ef4444" },
-                { hormone: "GH (croissance)", effet: "Supprimée", duree: "Usage chronique", impact: "Récupération musculaire, sommeil profond altérés", color: "#6366f1" },
-                { hormone: "Prolactine", effet: "↑↑", duree: "Usage chronique", impact: "Dysfonction sexuelle, troubles menstruels, galactorrhée", color: "#f87171" },
-                { hormone: "Dopamine baseline", effet: "↓↓ sous 100%", duree: "Mois post-arrêt", impact: "Anhedonia — rien ne procure de plaisir, risque rechute élevé", color: "#a855f7" },
-              ].map((h, i) => (
-                <div key={i} style={{ background: "#0d0d1a", border: "1px solid #1e1e3a", borderRadius: 10, padding: 14, borderLeft: `3px solid ${h.color}` }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
-                    <span style={{ fontSize: 13, fontWeight: "bold", color: h.color }}>{h.hormone}</span>
-                    <span style={{ fontSize: 12, fontFamily: "monospace", color: "#e2e8f0", fontWeight: "bold" }}>{h.effet}</span>
-                  </div>
-                  <div style={{ fontSize: 11, color: "#94a3b8", marginBottom: 4 }}>{h.impact}</div>
-                  <div style={{ fontSize: 10, color: "#475569", fontFamily: "monospace" }}>Durée : {h.duree}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {activeNav === "overdose" && (
-          <div>
-            <SectionTitle color={COLOR}>Overdose & Sevrage — informations critiques</SectionTitle>
-            <div style={{ background: "#1a0014", border: "2px solid #ef444488", borderRadius: 14, padding: 20, marginBottom: 24 }}>
-              <div style={{ fontSize: 14, color: "#ef4444", fontWeight: "bold", marginBottom: 10 }}>⚠️ OVERDOSE — RECONNAÎTRE ET RÉAGIR</div>
-              <div style={{ display: "grid", gridTemplateColumns: desk ? "1fr 1fr" : "1fr", gap: 16 }}>
-                <div>
-                  <div style={{ fontSize: 12, color: "#f87171", fontWeight: "bold", marginBottom: 8 }}>Signes d'overdose :</div>
-                  {["Lèvres et ongles bleus (cyanose)", "Respiration très lente, bruyante ou absente", "Pupilles en points fixes", "Inconscience, impossible à réveiller", "Teint grisâtre, corps flasque"].map((s, i) => (
-                    <div key={i} style={{ fontSize: 12, color: "#94a3b8", marginBottom: 4 }}>⚡ {s}</div>
-                  ))}
-                </div>
-                <div>
-                  <div style={{ fontSize: 12, color: "#22c55e", fontWeight: "bold", marginBottom: 8 }}>Que faire immédiatement :</div>
-                  {["Appeler le 15 (SAMU) ou 112", "Administrer la naloxone (Narcan) si disponible", "Position latérale de sécurité", "Pratiquer la ventilation si nécessaire", "Ne jamais laisser seule une personne en OD"].map((s, i) => (
-                    <div key={i} style={{ fontSize: 12, color: "#94a3b8", marginBottom: 4 }}>✓ {s}</div>
-                  ))}
-                </div>
-              </div>
-              <div style={{ marginTop: 14, padding: 12, background: "#060610", borderRadius: 8, fontSize: 12, color: "#22c55e" }}>
-                🟢 La naloxone (Narcan) est un antidote opioïde disponible en pharmacie sans ordonnance. Elle inverse l'overdose en 2-5 minutes. En posséder une peut sauver une vie.
-              </div>
-            </div>
-            <div style={{ display: "grid", gridTemplateColumns: desk ? "1fr 1fr" : "1fr", gap: 20 }}>
-              <div>
-                <div style={{ fontSize: 11, color: "#475569", letterSpacing: 2, fontFamily: "monospace", marginBottom: 14 }}>SYNDROME DE SEVRAGE — INTENSITÉ</div>
-                {[
-                  { time: "6-12h", level: 20, color: "#fbbf24", label: "Début — agitation, larmoiements" },
-                  { time: "12-24h", level: 55, color: "#f97316", label: "Modéré — douleurs, nausées" },
-                  { time: "24-48h", level: 90, color: "#ef4444", label: "Pic — souffrance sévère" },
-                  { time: "48-72h", level: 80, color: "#f87171", label: "Intense — vomissements, crampes" },
-                  { time: "3-5j", level: 50, color: "#fb923c", label: "Déclin — encore difficile" },
-                  { time: "1 semaine", level: 25, color: "#fbbf24", label: "Résiduel — fatigue, insomnie" },
-                  { time: "1 mois", level: 10, color: "#84cc16", label: "Stable — PAWS possible" },
-                ].map((item, i) => (
-                  <div key={i} style={{ marginBottom: 8 }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, marginBottom: 3 }}>
-                      <span style={{ color: "#64748b", fontFamily: "monospace" }}>{item.time}</span>
-                      <span style={{ color: item.color, fontSize: 10 }}>{item.label}</span>
-                    </div>
-                    <div style={{ height: 8, background: "#1e1e3a", borderRadius: 4 }}>
-                      <div style={{ width: `${item.level}%`, height: "100%", background: item.color, borderRadius: 4, opacity: 0.8 }} />
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <div>
-                <div style={{ fontSize: 11, color: "#475569", letterSpacing: 2, fontFamily: "monospace", marginBottom: 14 }}>TRAITEMENT DE SUBSTITUTION</div>
-                {[
-                  { drug: "Méthadone", class: "Agoniste µ complet", use: "Réduction risques + sevrage progressif. Demi-vie longue (24-36h) = 1 prise/j.", color: "#22c55e" },
-                  { drug: "Buprénorphine (Subutex)", class: "Agoniste µ partiel", use: "Standard en France. Moins d'abus potentiel. Combinée avec naloxone (Suboxone).", color: "#06b6d4" },
-                  { drug: "Naltrexone", class: "Antagoniste µ", use: "Bloque l'effet des opioïdes. Utilisé après sevrage pour prévenir rechute.", color: "#a855f7" },
-                ].map((t, i) => (
-                  <div key={i} style={{ background: "#0d0d1a", border: `1px solid ${t.color}33`, borderRadius: 12, padding: 14, marginBottom: 10 }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-                      <span style={{ fontSize: 14, fontWeight: "bold", color: t.color }}>{t.drug}</span>
-                      <span style={{ fontSize: 10, color: "#64748b", fontFamily: "monospace" }}>{t.class}</span>
-                    </div>
-                    <div style={{ fontSize: 12, color: "#94a3b8", lineHeight: 1.5 }}>{t.use}</div>
-                  </div>
-                ))}
-                <Card color="#475569">
-                  <div style={{ fontSize: 11, color: "#64748b", lineHeight: 1.6 }}>Le sevrage de l'héroïne n'est pas fatal en lui-même, mais la souffrance intense entraîne souvent une rechute. La substitution médicale est plus efficace que le sevrage brutal — elle réduit la mortalité et améliore les chances de récupération à long terme.</div>
-                </Card>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {activeNav === "stop" && (
-          <div>
-            <SectionTitle color={COLOR}>Récupération — bénéfices & étapes</SectionTitle>
-            <div style={{ display: "grid", gridTemplateColumns: desk ? "1fr 1fr" : "1fr", gap: 24 }}>
-              <div>
-                <div style={{ fontSize: 11, color: "#475569", letterSpacing: 2, fontFamily: "monospace", marginBottom: 14 }}>BÉNÉFICES DANS LE TEMPS</div>
-                {stopBenefits.map((period, i) => (
-                  <div key={i} style={{ display: "flex", gap: 12, marginBottom: 12 }}>
-                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-                      <div style={{ width: 10, height: 10, borderRadius: "50%", background: period.color, flexShrink: 0, marginTop: 4 }} />
-                      {i < stopBenefits.length - 1 && <div style={{ width: 2, flex: 1, background: `linear-gradient(${period.color}, ${stopBenefits[i+1].color})`, opacity: 0.3, minHeight: 30 }} />}
-                    </div>
-                    <div style={{ flex: 1, background: "#0d0d1a", border: `1px solid ${period.color}22`, borderRadius: 10, padding: 12 }}>
-                      <div style={{ fontSize: 11, color: period.color, fontFamily: "monospace", fontWeight: "bold", marginBottom: 6 }}>{period.period}</div>
-                      {period.benefits.map((b, j) => (
-                        <div key={j} style={{ fontSize: 12, color: "#94a3b8", marginBottom: 3 }}>✓ {b}</div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <div>
-                <div style={{ fontSize: 11, color: "#475569", letterSpacing: 2, fontFamily: "monospace", marginBottom: 14 }}>SOUTIEN & RESSOURCES</div>
-                {[
-                  { icon: "🏥", tip: "Consultation addictologie", desc: "Médecin ou structure spécialisée (CSAPA) — traitement de substitution et suivi médical." },
-                  { icon: "☎️", tip: "Drogues Info Service : 0800 23 13 13", desc: "Ligne gratuite, anonyme, 7j/7. Conseil, orientation, écoute." },
-                  { icon: "👥", tip: "Narcotics Anonymous (NA)", desc: "Groupes de parole entre pairs. Présents dans toute la France. Efficacité reconnue." },
-                  { icon: "🧠", tip: "Thérapie cognitivo-comportementale", desc: "La TCC réduit les rechutes en changeant les patterns de pensée liés à l'usage." },
-                  { icon: "🏃", tip: "Activité physique intensive", desc: "L'exercice libère des endorphines naturelles — aide à reconstruire le système de récompense." },
-                ].map((t, i) => (
-                  <div key={i} style={{ background: "#0d0d1a", border: "1px solid #1e1e3a", borderRadius: 12, padding: 14, marginBottom: 10, display: "flex", gap: 12 }}>
-                    <div style={{ fontSize: 22, flexShrink: 0 }}>{t.icon}</div>
-                    <div>
-                      <div style={{ fontSize: 13, fontWeight: "bold", color: "#e2e8f0", marginBottom: 4 }}>{t.tip}</div>
-                      <div style={{ fontSize: 12, color: "#64748b", lineHeight: 1.5 }}>{t.desc}</div>
-                    </div>
-                  </div>
-                ))}
-                <Card color={COLOR}>
-                  <div style={{ fontSize: 12, color: COLOR, fontWeight: "bold", marginBottom: 8 }}>🧠 La neuroplasticité comme espoir</div>
-                  <div style={{ fontSize: 12, color: "#94a3b8", lineHeight: 1.7 }}>Le cerveau se répare. Les circuits dopaminergiques endommagés se reconstruisent sur 12 à 24 mois d'abstinence. La capacité à ressentir du plaisir naturel revient progressivement. La récupération est réelle et mesurable en neuroimagerie.</div>
-                </Card>
-              </div>
-            </div>
-          </div>
-        )}
-
+      <div style={{ maxWidth: 900, margin: "0 auto", padding: desk ? "36px 48px" : "20px 16px" }}>
+        {renderSection()}
       </div>
 
       <div style={{ padding: "20px 48px 36px", borderTop: "1px solid #1e1e3a", textAlign: "center" }}>

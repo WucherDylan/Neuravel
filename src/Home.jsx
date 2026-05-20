@@ -77,7 +77,7 @@ const SUBSTANCES = [
     id: "cathinones",
     name: "Cathinones",
     icon: "🩷",
-    score: 18,
+    score: 13,
     color: "#ec4899",
     tagline: "3-MMC / 4-MMC — hybride cocaïne + MDMA à demi-vie courte",
     stats: ["Dopamine +380% / Séro +290%", "Redosage compulsif (2-3h)", "Risque syndrome sérotoninergique"],
@@ -108,6 +108,24 @@ const SUBSTANCES = [
     color: "#14b8a6",
     tagline: "Diéthylamide lysergique — 50 µg, 12 heures de voyage",
     stats: ["Actif dès 25 µg", "Trip 8–16 heures", "HPPD risque rare ~1–2%"],
+  },
+  {
+    id: "twocb",
+    name: "2C-B",
+    icon: "🔮",
+    score: 6,
+    color: "#d946ef",
+    tagline: "Phénéthylamine psychédélique — visuels riches, durée maîtrisable",
+    stats: ["Dose active 10–25 mg", "Trip 4–6 heures", "Entactogène à basses doses"],
+  },
+  {
+    id: "ketamine",
+    name: "Kétamine",
+    icon: "🌊",
+    score: 15,
+    color: "#38bdf8",
+    tagline: "Dissociatif antagoniste NMDA — anesthésique et antidépresseur",
+    stats: ["K-hole > 200 mg", "Cystite irréversible (usage chronique)", "Antidépresseur FDA 2019"],
   },
 ];
 
